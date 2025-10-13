@@ -1,34 +1,40 @@
 pipeline {
     agent any
+
     tools {
         maven 'mavenHome'
         jdk 'javaHome'
         git 'Default'
         allure 'allure'
     }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+
         stage('Build') {
             steps {
                 sh 'mvn clean compile'
             }
         }
+
         stage('Test') {
             steps {
                 sh 'mvn test'
             }
         }
     }
-   always {
-               // Publish allure report
-               allure([
-                   results: [[path: 'allure-results']],
-                   reportBuildPolicy: 'ALWAYS'
-               ])
-           }
-       }
+
+    post {
+        always {
+            // Publish Allure report
+            allure([
+                results: [[path: 'allure-results']],
+                reportBuildPolicy: 'ALWAYS'
+            ])
+        }
+    }
 }
