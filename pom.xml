@@ -77,10 +77,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M9</version>
                 <configuration>
-                    <suiteXmlFiles>
-                        <!-- path to your TestNG suite XML (if you use one) -->
-                        <suiteXmlFile>testng.xml</suiteXmlFile>
-                    </suiteXmlFiles>
                     <properties>
                         <property>
                             <name>listener</name>
