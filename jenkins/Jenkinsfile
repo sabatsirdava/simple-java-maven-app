@@ -4,6 +4,7 @@ pipeline {
         maven 'mavenHome'
         jdk 'javaHome'
         git 'Default'
+        allure 'allure'
     }
     stages {
         stage('Checkout') {
@@ -22,9 +23,12 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            junit '**/target/test-*.xml'
-        }
-    }
+   always {
+               // Publish allure report
+               allure([
+                   results: [[path: 'allure-results']],
+                   reportBuildPolicy: 'ALWAYS'
+               ])
+           }
+       }
 }
