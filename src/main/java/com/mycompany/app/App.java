@@ -1,5 +1,7 @@
 package com.mycompany.app;
 
+import io.qameta.allure.Step;
+
 /**
  * Hello world!
  */
@@ -17,6 +19,7 @@ public class App {
     public String getMessage() {
         return MESSAGE;
     }
+    @Step("get hostname")
     public String getHostname() {
         return HOSTNAME;
     }

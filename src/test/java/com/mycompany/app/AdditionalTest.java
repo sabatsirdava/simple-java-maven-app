@@ -1,11 +1,14 @@
 package com.mycompany.app;
 
 
+import io.qameta.allure.testng.AllureTestNg;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+@Listeners({AllureTestNg.class})
 public class AdditionalTest {
 
     @Test
