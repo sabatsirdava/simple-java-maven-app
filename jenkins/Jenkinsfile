@@ -56,7 +56,7 @@ pipeline {
         stage('UI Tests (Integration)') {
             // Logical Construct: Conditional execution (only run UI on the main branch)
             when {
-                branch 'main'
+                branch 'master'
             }
             steps {
                 echo 'Running UI Tests (Group: ui)...'
