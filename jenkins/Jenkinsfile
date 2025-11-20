@@ -77,8 +77,8 @@ pipeline {
             
             // Organizing and Accessing Auto Tests Results (Allure HTML Reporter)
             // Assumes Allure Jenkins Plugin is installed
-            allure report: ALLURE_RESULTS_DIR, branchGlobal: false, jobResults: false
-            
+            allure results: ["${env.ALLURE_RESULTS_DIR}"]
+
             // Records TestNG results for Jenkins' built-in trending and status checks
             junit 'target/surefire-reports/*.xml'
         }
