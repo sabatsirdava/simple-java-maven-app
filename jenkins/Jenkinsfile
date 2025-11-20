@@ -22,9 +22,12 @@ pipeline {
 
     // Build Triggers: Git changes hooks (Jenkins setup required later)
     triggers {
-        // Poll SCM is a backup, but Webhook (GitHub/GitLab) is the modern hook
-        // H/5 * * * * checks Git repo every 5 minutes
-        pollSCM 'H/5 * * * *' 
+        // 1. Cron/Timer Trigger: Executes a build every day at 2:00 AM
+        // Syntax: MIN HOUR DOM MON DOW
+        cron '0 2 * * *'
+
+        // 2. Poll SCM: The backup trigger to check Git for changes every 5 minutes
+        pollSCM 'H/5 * * * *'
     }
 
     stages {
