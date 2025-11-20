@@ -61,17 +61,17 @@ pipeline {
 
         // === Multi-stage Pipeline Stage 3: UI Tests ===
         stage('UI Tests (Integration)') {
-            // Logical Construct: Conditional execution (only run UI on the main branch)
-            when {
-                environment name: 'BRANCH_NAME', value: 'master'
+                // FIX: Use an expression to check the reliable GIT_BRANCH variable
+                when {
+                    expression { return env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH == 'master' }
+                }
+                steps {
+                    echo 'Running UI Tests (Group: ui)...'
+
+                    // Runs UI tests by injecting the 'ui' group
+                    bat 'mvn test -Dtest.groups=ui'
+                }
             }
-            steps {
-                echo 'Running UI Tests (Group: ui)...'
-                
-                // Runs UI tests by injecting the 'ui' group
-                bat 'mvn test -Dtest.groups=ui'
-            }
-        }
     }
 
     // Post-build actions: run cleanup and reporting regardless of stage success
