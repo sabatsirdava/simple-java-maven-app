@@ -1,7 +1,9 @@
 // Pipeline Syntax: Declarative
 pipeline {
     // Purpose of a Pipeline: Defines the entire CD process as code (Pipeline as Code)
-    agent any
+    agent {
+            label 'TEST_NODE' // Targets the specific node you just configured
+        }
 
     tools {
             // This makes the configured tool available in the build environment
