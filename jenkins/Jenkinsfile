@@ -1,40 +1,97 @@
+// Pipeline Syntax: Declarative
 pipeline {
+    // Purpose of a Pipeline: Defines the entire CD process as code (Pipeline as Code)
     agent any
 
-    tools {
-        maven 'mavenHome'
-        jdk 'javaHome'
-        git 'git'
-        allure 'allure'
+    // Environment variables for reusable paths and properties
+    environment {
+        // Directory created by the Allure TestNG Listener
+        ALLURE_RESULTS_DIR = 'allure-results'
+        // File created in the API Tests stage to be archived/transferred
+        API_SUMMARY_ARTIFACT = 'api_data_summary.txt' 
+        // Build token for REST API remote trigger (for exam topic coverage)
+        BUILD_AUTH_TOKEN = 'MY_AUTOMATION_TOKEN_123' 
+    }
+
+    // Build Triggers: Git changes hooks (Jenkins setup required later)
+    triggers {
+        // Poll SCM is a backup, but Webhook (GitHub/GitLab) is the modern hook
+        // H/5 * * * * checks Git repo every 5 minutes
+        pollSCM 'H/5 * * * *' 
     }
 
     stages {
-        stage('Checkout') {
+        // === Multi-stage Pipeline Stage 1: Build ===
+        stage('Build & Dependencies') {
             steps {
-                checkout scm
+                echo 'Cleaning and building project using Maven...'
+                // Use the sh step for Linux/Unix agents, or bat for Windows
+                sh 'mvn clean install -DskipTests'
             }
         }
 
-        stage('Build') {
+        // === Multi-stage Pipeline Stage 2: API Tests ===
+        stage('API Tests & Artifact Creation') {
             steps {
-                bat 'mvn clean compile'
+                echo 'Running API Tests (Group: api)...'
+                
+                // Runs API tests by injecting the 'api' group into the pom.xml placeholder
+                sh 'mvn test -Dtest.groups=api'
+                
+                // Saving Artifacts: Create a dummy artifact (Simulates RestAssured generating a payload/summary)
+                sh "echo 'API Tests Run Count: 10, Success Rate: 90%' > ${API_SUMMARY_ARTIFACT}"
+                
+                // Logical Construct: Fail the build if the summary file wasn't created
+                script {
+                    if (fileExists(env.API_SUMMARY_ARTIFACT)) {
+                        echo "API Summary Artifact created successfully."
+                    } else {
+                        error "Artifact missing! Failing the build."
+                    }
+                }
             }
         }
 
-        stage('Test') {
+        // === Multi-stage Pipeline Stage 3: UI Tests ===
+        stage('UI Tests (Integration)') {
+            // Logical Construct: Conditional execution (only run UI on the main branch)
+            when {
+                branch 'main'
+            }
             steps {
-                bat 'mvn test'
+                echo 'Running UI Tests (Group: ui)...'
+                
+                // Runs UI tests by injecting the 'ui' group
+                sh 'mvn test -Dtest.groups=ui'
             }
         }
     }
 
+    // Post-build actions: run cleanup and reporting regardless of stage success
     post {
         always {
-            // Publish Allure report
-            allure([
-                results: [[path: 'allure-results']],
-                reportBuildPolicy: 'ALWAYS'
-            ])
+            echo 'Archiving and Publishing Results...'
+            
+            // Publishing Artifacts: Saves the compiled JAR and the custom summary file
+            archiveArtifacts artifacts: 'target/*.jar, ${API_SUMMARY_ARTIFACT}', fingerprint: true
+            
+            // Organizing and Accessing Auto Tests Results (Allure HTML Reporter)
+            // Assumes Allure Jenkins Plugin is installed
+            allure report: ALLURE_RESULTS_DIR, branchGlobal: false, jobResults: false
+            
+            // Records TestNG results for Jenkins' built-in trending and status checks
+            junit 'target/surefire-reports/*.xml'
+        }
+        
+        // Logical Construct: Send notification only if the build succeeds
+        success {
+            // Placeholder for sending an email/Slack notification
+            echo 'Pipeline SUCCESS: All tests passed.' 
+        }
+        
+        // Logical Construct: Send a different notification if the build fails
+        failure {
+            echo 'Pipeline FAILURE: One or more tests failed. Check Allure report.'
         }
     }
 }
