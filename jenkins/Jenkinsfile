@@ -3,6 +3,11 @@ pipeline {
     // Purpose of a Pipeline: Defines the entire CD process as code (Pipeline as Code)
     agent any
 
+    tools {
+            // This makes the configured tool available in the build environment
+            allure 'Allure_CLI'
+    }
+
     // Environment variables for reusable paths and properties
     environment {
         // Directory created by the Allure TestNG Listener
@@ -81,7 +86,7 @@ pipeline {
             // Assumes Allure Jenkins Plugin is installed
             allure results: [
                 [path: env.ALLURE_RESULTS_DIR]
-            ], tool: 'Allure_CLI'
+            ]
 
             // Records TestNG results for Jenkins' built-in trending and status checks
             junit 'target/surefire-reports/*.xml'
