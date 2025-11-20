@@ -47,6 +47,8 @@ pipeline {
                 
                 // Saving Artifacts: Create a dummy artifact (Simulates RestAssured generating a payload/summary)
                 bat "echo 'API Tests Run Count: 10, Success Rate: 90%' > ${API_SUMMARY_ARTIFACT}"
+
+                bat "echo Verifying artifact existence in: ${WORKSPACE}/${API_SUMMARY_ARTIFACT}"
                 
                 // Logical Construct: Fail the build if the summary file wasn't created
                 script {
@@ -80,7 +82,10 @@ pipeline {
             echo 'Archiving and Publishing Results...'
             
             // Publishing Artifacts: Saves the compiled JAR and the custom summary file
-            archiveArtifacts artifacts: 'target/*.jar, ${API_SUMMARY_ARTIFACT}', fingerprint: true
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+
+            // 2. Archive the custom text file separately (explicit name)
+            archiveArtifacts artifacts: 'api_data_summary.txt', fingerprint: true
             
             // Organizing and Accessing Auto Tests Results (Allure HTML Reporter)
             // Assumes Allure Jenkins Plugin is installed
