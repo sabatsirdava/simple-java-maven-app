@@ -79,7 +79,7 @@ pipeline {
             // Assumes Allure Jenkins Plugin is installed
             allure results: [
                 [path: env.ALLURE_RESULTS_DIR]
-            ]
+            ], tool: 'Allure_CLI'
 
             // Records TestNG results for Jenkins' built-in trending and status checks
             junit 'target/surefire-reports/*.xml'
