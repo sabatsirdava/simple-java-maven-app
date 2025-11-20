@@ -34,6 +34,8 @@ pipeline {
         stage('API Tests & Artifact Creation') {
             steps {
                 echo 'Running API Tests (Group: api)...'
+                echo "DEBUG: Current branch name is: ${env.BRANCH_NAME}"
+                echo "DEBUG: Another possible branch name: ${env.GIT_BRANCH}"
                 
                 // Runs API tests by injecting the 'api' group into the pom.xml placeholder
                 bat 'mvn test -Dtest.groups=api'
@@ -56,7 +58,7 @@ pipeline {
         stage('UI Tests (Integration)') {
             // Logical Construct: Conditional execution (only run UI on the main branch)
             when {
-                branch 'master'
+                environment name: 'BRANCH_NAME', value: 'master'
             }
             steps {
                 echo 'Running UI Tests (Group: ui)...'
@@ -79,7 +81,7 @@ pipeline {
             // Assumes Allure Jenkins Plugin is installed
             allure results: [
                 [path: env.ALLURE_RESULTS_DIR]
-            ]
+            ], tool: 'Allure_CLI'
 
             // Records TestNG results for Jenkins' built-in trending and status checks
             junit 'target/surefire-reports/*.xml'
