@@ -39,14 +39,16 @@ pipeline {
 
         // === Multi-stage Pipeline Stage 2: API Tests ===
         stage('API Tests & Artifact Creation') {
+            when {
+                expression { return params.TEST_GROUP == 'api' }
+            }
             steps {
-                echo 'Running API Tests (Group: api)...'
+                echo "Running API Tests using parameter: ${params.TEST_GROUP}..."
                 echo "DEBUG: Current branch name is: ${env.BRANCH_NAME}"
                 echo "DEBUG: Another possible branch name: ${env.GIT_BRANCH}"
                 
                 // Runs API tests by injecting the 'api' group into the pom.xml placeholder
-                bat 'mvn test -Dtest.groups=api'
-                
+                bat "mvn test -Dtest.groups=${params.TEST_GROUP}"
                 // Saving Artifacts: Create a dummy artifact (Simulates RestAssured generating a payload/summary)
                 bat "echo 'API Tests Run Count: 10, Success Rate: 90%' > ${API_SUMMARY_ARTIFACT}"
 
@@ -67,13 +69,13 @@ pipeline {
         stage('UI Tests (Integration)') {
                 // FIX: Use an expression to check the reliable GIT_BRANCH variable
                 when {
-                    expression { return env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH == 'master' }
+                    expression {
+                         return (env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH == 'master') && (params.TEST_GROUP == 'ui')
                 }
                 steps {
-                    echo 'Running UI Tests (Group: ui)...'
+                    echo "Running UI Tests using parameter: ${params.TEST_GROUP}..."
 
-                    // Runs UI tests by injecting the 'ui' group
-                    bat 'mvn test -Dtest.groups=ui'
+                    bat "mvn test -Dtest.groups=${params.TEST_GROUP}"
                 }
             }
     }
