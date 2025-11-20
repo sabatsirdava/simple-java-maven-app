@@ -26,7 +26,7 @@ pipeline {
             steps {
                 echo 'Cleaning and building project using Maven...'
                 // Use the sh step for Linux/Unix agents, or bat for Windows
-                sh 'mvn clean install -DskipTests'
+                bat 'mvn clean install -DskipTests'
             }
         }
 
@@ -36,10 +36,10 @@ pipeline {
                 echo 'Running API Tests (Group: api)...'
                 
                 // Runs API tests by injecting the 'api' group into the pom.xml placeholder
-                sh 'mvn test -Dtest.groups=api'
+                bat 'mvn test -Dtest.groups=api'
                 
                 // Saving Artifacts: Create a dummy artifact (Simulates RestAssured generating a payload/summary)
-                sh "echo 'API Tests Run Count: 10, Success Rate: 90%' > ${API_SUMMARY_ARTIFACT}"
+                bat "echo 'API Tests Run Count: 10, Success Rate: 90%' > ${API_SUMMARY_ARTIFACT}"
                 
                 // Logical Construct: Fail the build if the summary file wasn't created
                 script {
@@ -62,7 +62,7 @@ pipeline {
                 echo 'Running UI Tests (Group: ui)...'
                 
                 // Runs UI tests by injecting the 'ui' group
-                sh 'mvn test -Dtest.groups=ui'
+                bat 'mvn test -Dtest.groups=ui'
             }
         }
     }
